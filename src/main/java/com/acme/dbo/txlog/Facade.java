@@ -9,32 +9,12 @@ public class Facade {
     private static int stringCounter;
     private static String currentString;
 
-    private static void logToConsole(String message) {
-        System.out.println(message);
-    }
-
-    private static void logPrimitive(String message) {
-        logToConsole("primitive: " + message);
-    }
-
-    private static void logString(String message) {
-        logToConsole("string: " + message);
-    }
-
-    private static boolean isOverflow(int valueToCheck) {
-        return valueToCheck < 0;
-    }
-
-    private static boolean isOverflow(byte valueToCheck) {
-        return valueToCheck < (byte) 0;
-    }
-
     public static void log(int message) {
         if (currentType != messageType.INT) {
             flush();
             currentType = messageType.INT;
         }
-        if (isOverflow(currentInt + message)) {
+        if (isOverflow(currentInt, message)) {
             flush();
             currentInt = 0;
         }
@@ -50,7 +30,7 @@ public class Facade {
             flush();
             currentType = messageType.BYTE;
         }
-        if (isOverflow((byte) (currentByte + message))) {
+        if (isOverflow(currentByte, message)) {
             flush();
             currentByte = (byte) 0;
         }
@@ -79,6 +59,31 @@ public class Facade {
         logToConsole("reference: " + message);
     }
 
+    private static void logToConsole(String message) {
+        System.out.println(message);
+    }
+
+    private static void logPrimitive(String message) {
+        logToConsole("primitive: " + message);
+    }
+
+    private static void logString(String message) {
+        logToConsole("string: " + message);
+    }
+
+    private static boolean isOverflow(int baseValue, int valueToCheck) {
+        return valueToCheck > 0 && baseValue + valueToCheck < baseValue || valueToCheck < 0 && baseValue + valueToCheck > baseValue;
+    }
+
+    private static boolean isOverflow(byte baseValue, byte valueToCheck) {
+        return valueToCheck > 0 && (byte) (baseValue + valueToCheck) < baseValue
+                || valueToCheck < 0 && (byte) (baseValue + valueToCheck) > baseValue;
+    }
+
+    private static boolean isOverflow(byte valueToCheck) {
+        return valueToCheck < (byte) 0;
+    }
+
     public static void flush() {
         switch (currentType) {
             case INT:
@@ -98,8 +103,6 @@ public class Facade {
             default:
                 break;
         }
-
-        //currentType = messageType.UNDEFINED;
     }
 
     private enum messageType {
